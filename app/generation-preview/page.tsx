@@ -1,4 +1,5 @@
 'use client';
+import { saveClassroom } from '@/lib/persistence/storage-service';
 
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -35,6 +36,7 @@ import { StepVisualizer } from './components/visualizers';
 
 const log = createLogger('GenerationPreview');
 const OUTLINE_REVIEW_AUTO_CONTINUE_MS = 2500;
+
 
 function GenerationPreviewContent() {
   const router = useRouter();
@@ -959,6 +961,12 @@ function GenerationPreviewContent() {
 
       sessionStorage.removeItem('generationSession');
       await store.saveToStorage();
+      await saveClassroom({
+        id: stage.id,
+        stage,
+        scenes: store.getState().scenes,
+        outlines: store.getState().outlines,
+      });
       router.push(`/classroom/${stage.id}`);
     } catch (err) {
       setIsOutlineStreaming(false);

@@ -1,0 +1,18 @@
+{
+  "test-classroom-001": {
+    "id": "test-classroom-001",
+    "stage": {
+      "type": "pbl",
+      "title": "Verification Test"
+    },
+    "scenes": [
+      {
+        "id": 1,
+        "content": "Sample course content"
+      }
+    ],
+    "outlines": {
+      "structure": "test"
+    }
+  }
+}
