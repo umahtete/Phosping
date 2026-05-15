@@ -4,9 +4,6 @@ const nextConfig: NextConfig = {
   output: process.env.VERCEL ? undefined : 'standalone',
   transpilePackages: ['mathml2omml', 'pptxgenjs'],
   serverExternalPackages: [],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   experimental: {
     proxyClientMaxBodySize: '200mb',
   },
