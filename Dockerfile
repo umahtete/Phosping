@@ -47,7 +47,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --chown=nextjs:nodejs scripts/migrate.js ./scripts/migrate.js
 
-RUN mkdir -p /app/data/classrooms /app/data/classroom-jobs && \
+RUN mkdir -p /app/data/classrooms /app/data/classroom-jobs /app/data/lti-keys && \
     chown -R nextjs:nodejs /app/data
 
 USER nextjs

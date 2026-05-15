@@ -35,17 +35,20 @@ Make persistence reliable for production use.
 - [ ] **Known limitation:** Client-side generated media (manual course creation) stays in IndexedDB — needs upload-to-server feature for full coverage
 
 ## Phase 3: LTI 1.3 Integration (5-7 days)
-**Status: Pending**
+**Status: ✅ Core complete** (commit TBD, pushed 2026-05-16)
 
 Core integration with Moodle.
 
-- [ ] Add LTI 1.3 libraries
-- [ ] LTI platform registration in Moodle
-- [ ] Implement OIDC launch flow (`/api/lti/launch`)
-- [ ] Store LTI context in database
-- [ ] Implement Deep Linking for specific classroom launches
-- [ ] Middleware: validate LTI sessions for `/classroom/[id]` access
-- [ ] LTI configuration management
+- [x] Add LTI 1.3 libraries (`jose` for JWT signing/verification)
+- [x] LTI platform registration API (`/api/lti/platforms` CRUD)
+- [x] Implement OIDC launch flow (`/api/lti/login` → `/api/lti/launch`)
+- [x] Store LTI context in database (`LtiPlatform` model + migration)
+- [x] Implement Deep Linking for specific classroom launches (`/api/lti/deep-linking-return` + picker UI)
+- [x] LTI session validation — access-code-guard checks `/api/lti/session` for LTI users
+- [x] JWKS endpoint (`/api/lti/jwks`) for platform key verification
+- [x] LTI key pair management (auto-generated RSA keys stored on persistent volume)
+- [ ] Manual step: Register LuxUp Tutor as External Tool in Moodle using JWKS URL and launch URLs
+- [ ] Manual step: Test full OIDC flow with actual Moodle instance
 
 ## Phase 4: Grade Passback (3-5 days)
 **Status: Pending**
