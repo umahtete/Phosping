@@ -9,7 +9,7 @@
   "scripts": {
     "postinstall": "cd packages/mathml2omml && npm run build && cd ../pptxgenjs && npm run build",
     "dev": "next dev",
-    "build": "next build --no-lint",
+    "build": "prisma generate && next build",
     "db:migrate": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
@@ -134,6 +134,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
       "prisma",
       "sharp"
     ]
