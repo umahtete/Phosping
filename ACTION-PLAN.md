@@ -35,11 +35,11 @@ Make persistence reliable for production use.
 - [ ] **Known limitation:** Client-side generated media (manual course creation) stays in IndexedDB — needs upload-to-server feature for full coverage
 
 ## Phase 3: LTI 1.3 Integration (5-7 days)
-**Status: ✅ Core complete** (commit TBD, pushed 2026-05-16)
+**Status: ✅ Core complete** (commit `5835c72`, pushed 2026-05-16; `jose` fix `d16bd2d`)
 
 Core integration with Moodle.
 
-- [x] Add LTI 1.3 libraries (`jose` for JWT signing/verification)
+- [x] Add LTI 1.3 libraries (`jose` for JWT signing/verification) — fixed missing dep in `d16bd2d`
 - [x] LTI platform registration API (`/api/lti/platforms` CRUD)
 - [x] Implement OIDC launch flow (`/api/lti/login` → `/api/lti/launch`)
 - [x] Store LTI context in database (`LtiPlatform` model + migration)
@@ -51,7 +51,7 @@ Core integration with Moodle.
 - [ ] Manual step: Test full OIDC flow with actual Moodle instance
 
 ## Phase 4: Grade Passback (3-5 days)
-**Status: ✅ Core complete** (commit TBD, pushed 2026-05-16)
+**Status: ✅ Core complete** (commit `2e92d45`, pushed 2026-05-16)
 
 Connect quiz results to Moodle gradebook.
 
