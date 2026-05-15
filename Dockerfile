@@ -15,7 +15,7 @@ RUN apk add --no-cache python3 build-base g++ cairo-dev pango-dev jpeg-dev gifli
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
 
-RUN pnpm add pg @prisma/adapter-pg && pnpm install --frozen-lockfile
+RUN pnpm add pg @types/pg @prisma/adapter-pg && pnpm install --frozen-lockfile
 
 # ---- Stage 3: Builder ----
 FROM base AS builder
