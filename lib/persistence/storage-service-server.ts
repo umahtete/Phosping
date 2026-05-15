@@ -1,12 +1,22 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+
 export async function saveClassroom(data: any) {
-  return await prisma.classroom.upsert({
-    where: { id: data.id },
-    update: { stage: data.stage, scenes: data.scenes, outlines: data.outlines },
-    create: { id: data.id, stage: data.stage, scenes: data.scenes, outlines: data.outlines },
-  });
+  const prisma = new PrismaClient({ adapter: undefined });
+  try {
+    return await prisma.classroom.upsert({
+      where: { id: data.id },
+      update: { stage: data.stage, scenes: data.scenes, outlines: data.outlines },
+      create: { id: data.id, stage: data.stage, scenes: data.scenes, outlines: data.outlines },
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 export async function getClassroom(id: string) {
-  return await prisma.classroom.findUnique({ where: { id } });
+  const prisma = new PrismaClient({ adapter: undefined });
+  try {
+    return await prisma.classroom.findUnique({ where: { id } });
+  } finally {
+    await prisma.$disconnect();
+  }
 }
