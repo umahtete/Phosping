@@ -1,9 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-// Use standard PrismaClient; assume DATABASE_URL is in environment
-// In Prisma 7.x, the datasource URL is managed via the environment variable DATABASE_URL
-// and the schema file. Forcing manual overriding here is causing the validation error.
-const prisma = new PrismaClient();
+import { prisma } from './prisma-client';
 
 export async function saveClassroom(data: { id: string; stage: any; scenes: any; outlines: any }) {
   return await prisma.classroom.upsert({

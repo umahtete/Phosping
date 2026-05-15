@@ -1,5 +1,5 @@
 'use client';
-import { saveClassroom } from '@/lib/persistence/storage-service';
+// import { saveClassroom } from '@/lib/persistence/storage-service';
 
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -88,6 +88,15 @@ function GenerationPreviewContent() {
   const persistSession = (nextSession: GenerationSessionState) => {
     setSession(nextSession);
     sessionStorage.setItem('generationSession', JSON.stringify(nextSession));
+  };
+
+  const saveClassroomProxy = async (data: any) => {
+    const response = await fetch('/api/classroom/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
   };
 
   const clearOutlineReviewTimer = () => {
@@ -961,7 +970,7 @@ function GenerationPreviewContent() {
 
       sessionStorage.removeItem('generationSession');
       await store.saveToStorage();
-      await saveClassroom({
+      await saveClassroomProxy({
         id: stage.id,
         stage,
         scenes: store.scenes,
