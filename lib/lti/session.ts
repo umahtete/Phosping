@@ -18,6 +18,10 @@ export interface LtiSession {
   resourceLinkTitle?: string;
   deploymentId: string;
   launchedAt: number;
+  // AGS (Assignment and Grade Services)
+  agsEndpoint?: string;
+  agsLineItem?: string;
+  agsScope?: string[];
 }
 
 const SESSION_COOKIE = 'luxup_lti_session';
@@ -40,6 +44,9 @@ export async function createLtiSession(launch: LtiResourceLinkLaunch): Promise<s
     resourceLinkTitle: launch['https://purl.imsglobal.org/spec/lti/claim/resource_link']?.title,
     deploymentId: launch['https://purl.imsglobal.org/spec/lti/claim/deployment_id'],
     launchedAt: Date.now(),
+    agsEndpoint: launch['https://purl.imsglobal.org/spec/lti-ags/claim/endpoint']?.lineitems,
+    agsLineItem: launch['https://purl.imsglobal.org/spec/lti-ags/claim/endpoint']?.lineitem,
+    agsScope: launch['https://purl.imsglobal.org/spec/lti-ags/claim/scope'],
   };
 
   const token = await new SignJWT(session as unknown as Record<string, unknown>)

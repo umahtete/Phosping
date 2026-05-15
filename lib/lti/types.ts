@@ -51,6 +51,12 @@ export interface LtiResourceLinkLaunch {
   given_name?: string;
   family_name?: string;
   picture?: string;
+  // AGS (Assignment and Grade Services) claims
+  'https://purl.imsglobal.org/spec/lti-ags/claim/endpoint'?: {
+    lineitems?: string;
+    lineitem?: string;
+  };
+  'https://purl.imsglobal.org/spec/lti-ags/claim/scope'?: string[];
 }
 
 /** LTI 1.3 Deep Linking launch claims. */

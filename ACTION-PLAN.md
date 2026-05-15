@@ -51,14 +51,18 @@ Core integration with Moodle.
 - [ ] Manual step: Test full OIDC flow with actual Moodle instance
 
 ## Phase 4: Grade Passback (3-5 days)
-**Status: Pending**
+**Status: ✅ Core complete** (commit TBD, pushed 2026-05-16)
 
 Connect quiz results to Moodle gradebook.
 
-- [ ] Implement LTI AGS (Assignment and Grade Services)
-- [ ] Map quiz scores → LTI AGS line items
-- [ ] Grade submission on quiz completion
-- [ ] Overall course completion grade passback
+- [x] Implement LTI AGS (Assignment and Grade Services)
+- [x] Map quiz scores → LTI AGS line items (scoreMaximum: 100 in deep linking)
+- [x] Grade submission on quiz completion (useEffect in QuizView when phase='reviewing')
+- [x] AGS claims extraction from launch token (lineitems, lineitem, scope)
+- [x] OAuth 2.0 client credentials flow (JWT assertion, token caching)
+- [x] AGS status endpoint for client-side availability check
+- [ ] Manual step: Verify AGS scopes are enabled in Moodle tool registration
+- [ ] Manual step: Test grade passback with actual quiz completion
 
 ## Phase 5: SiteONTHEGO Integration (2-3 days)
 **Status: Pending**

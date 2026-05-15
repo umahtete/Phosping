@@ -21,6 +21,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('QuizView');
 import type { QuizQuestion } from '@/lib/types/stage';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
+import { useLtiGradePassback } from '@/lib/hooks/use-lti-grade-passback';
 import { SpeechButton } from '@/components/audio/speech-button';
 import { gradeChoiceQuestions, isShortAnswer, type QuestionResult } from '@/lib/quiz/grading';
 import {
@@ -663,6 +664,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
   const [results, setResults] = useState<QuestionResult[]>(() =>
     initialSubmitted?.kind === 'reviewing' ? initialSubmitted.results : [],
   );
+  const { submitGrade: submitLtiGrade } = useLtiGradePassback();
 
   // Draft cache for quiz answers, keyed by sceneId to isolate across classrooms
   const {
@@ -764,6 +766,16 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
   }, [clearAnswersCache, sceneId]);
 
   const earnedScore = useMemo(() => results.reduce((sum, r) => sum + r.earned, 0), [results]);
+
+  // LTI AGS grade passback — fire once when quiz transitions to reviewing phase
+  useEffect(() => {
+    if (phase !== 'reviewing' || results.length === 0) return;
+
+    const total = questions.reduce((sum, q) => sum + (q.points ?? 1), 0);
+    if (total > 0) {
+      submitLtiGrade(earnedScore, total);
+    }
+  }, [phase, results.length, earnedScore, questions, submitLtiGrade]);
 
   const resultMap = useMemo(() => {
     const map: Record<string, QuestionResult> = {};
