@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" fill="none">
+  <defs>
+    <linearGradient id="bulb-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFC857"/>
+      <stop offset="100%" stop-color="#D4920B"/>
+    </linearGradient>
+    <linearGradient id="ray-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFC857"/>
+      <stop offset="100%" stop-color="#F5A623"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Light rays -->
+  <line x1="48" y1="8" x2="48" y2="20" stroke="url(#ray-grad)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="25" y1="16" x2="33" y2="26" stroke="url(#ray-grad)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="71" y1="16" x2="63" y2="26" stroke="url(#ray-grad)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="16" y1="38" x2="28" y2="40" stroke="url(#ray-grad)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="80" y1="38" x2="68" y2="40" stroke="url(#ray-grad)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Bulb body -->
+  <path d="M48 24 C32 24 22 36 22 48 C22 56 28 62 34 66 L34 72 C34 74 36 76 38 76 L58 76 C60 76 62 74 62 72 L62 66 C68 62 74 56 74 48 C74 36 64 24 48 24Z" fill="url(#bulb-grad)"/>
+
+  <!-- Bulb highlight -->
+  <ellipse cx="40" cy="42" rx="6" ry="8" fill="rgba(255,255,255,0.3)"/>
+
+  <!-- Bulb base lines -->
+  <rect x="38" y="78" width="20" height="3" rx="1.5" fill="#D4920B"/>
+  <rect x="40" y="83" width="16" height="3" rx="1.5" fill="#D4920B"/>
+  <path d="M42 89 Q48 94 54 89" stroke="#D4920B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- LuxUp text -->
+  <text x="100" y="62" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" fill="#1A1A2E" letter-spacing="-1">Lux</text>
+  <text x="210" y="62" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" fill="#D4920B" letter-spacing="-1">Up</text>
+
+  <!-- Tutor text -->
+  <text x="274" y="62" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="40" font-weight="300" fill="#1A1A2E" opacity="0.6" letter-spacing="1">Tutor</text>
+</svg>

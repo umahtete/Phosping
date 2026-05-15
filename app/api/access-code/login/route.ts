@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { createAccessToken } from '@/lib/auth/access-code';
 
 export async function POST(req: Request) {
   const { code } = await req.json();
@@ -9,8 +10,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Set the secure cookie
-  (await cookies()).set('openmaic_access', 'true', {
+  (await cookies()).set('luxup_access', createAccessToken(ACCESS_CODE), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',

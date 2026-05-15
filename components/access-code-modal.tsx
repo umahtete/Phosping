@@ -31,7 +31,7 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/access-code/verify', {
+      const res = await fetch('/api/access-code/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
@@ -118,7 +118,7 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25, duration: 0.4 }}
               >
-                OpenMAIC
+                LuxUp Tutor
               </motion.p>
 
               {/* Form */}

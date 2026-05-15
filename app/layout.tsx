@@ -18,9 +18,9 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'OpenMAIC',
+  title: 'LuxUp Tutor',
   description:
-    'The open-source AI interactive classroom. Upload a PDF to instantly generate an immersive, multi-agent learning experience.',
+    'AI-powered interactive learning experiences. Personalised courses delivered through immersive, multi-agent classrooms.',
 };
 
 export default function RootLayout({
