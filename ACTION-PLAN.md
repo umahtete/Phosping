@@ -22,15 +22,17 @@ Get the platform usable for the in-house team immediately.
 - [ ] Set ACCESS_CODE env var in Coolify (manual step — needs deployment to take effect)
 
 ## Phase 2: Storage Hardening (2-3 days)
-**Status: Pending**
+**Status: ✅ Complete** (commit `b2af791`, pushed 2026-05-15)
 
 Make persistence reliable for production use.
 
-- [ ] Expand Prisma schema: add `createdAt`, `updatedAt`, `title`, `status`, `userId`, `ltiContextId` fields
-- [ ] Implement StorageProvider for media files using `/app/public/media` volume
-- [ ] Auto-save classrooms to PostgreSQL after generation completes
-- [ ] Ensure `/classroom/[id]` works purely from PostgreSQL (no IndexedDB dependency for playback)
-- [ ] Run Prisma migrations
+- [x] Expand Prisma schema: add `createdAt`, `updatedAt`, `title`, `status`, `userId`, `ltiContextId` fields
+- [x] Update storage services (`storage-service.ts`, `storage-service-server.ts`) with typed `SaveClassroomData` interface
+- [x] Auto-save classrooms to PostgreSQL after server-side generation completes (non-fatal fallback)
+- [x] Ensure `/classroom/[id]` works from PostgreSQL — existing client-side fallback already reads from `GET /api/classroom?id=X`
+- [x] Server-side media files served via `/api/classroom-media/{id}/...` from persistent `/app/data` volume
+- [x] Custom migration runner (`scripts/migrate.js`) runs at Docker container startup before `server.js`
+- [ ] **Known limitation:** Client-side generated media (manual course creation) stays in IndexedDB — needs upload-to-server feature for full coverage
 
 ## Phase 3: LTI 1.3 Integration (5-7 days)
 **Status: Pending**

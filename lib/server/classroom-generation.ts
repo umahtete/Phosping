@@ -470,7 +470,7 @@ export async function generateClassroom(
       stage,
       scenes,
       outlines,
-      title: stage.name || stage.topic || null,
+      title: stage.name || null,
       status: 'active',
     });
     log.info(`Classroom persisted to PostgreSQL: ${stageId}`);
