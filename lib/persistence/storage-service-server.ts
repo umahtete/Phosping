@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client';
 
 export async function saveClassroom(data: any) {
-  const prisma = new PrismaClient();
+  const prisma = createPrismaClient();
   try {
     return await prisma.classroom.upsert({
       where: { id: data.id },
@@ -13,7 +13,7 @@ export async function saveClassroom(data: any) {
   }
 }
 export async function getClassroom(id: string) {
-  const prisma = new PrismaClient();
+  const prisma = createPrismaClient();
   try {
     return await prisma.classroom.findUnique({ where: { id } });
   } finally {
