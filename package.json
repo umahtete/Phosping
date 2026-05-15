@@ -9,7 +9,7 @@
   "scripts": {
     "postinstall": "cd packages/mathml2omml && npm run build && cd ../pptxgenjs && npm run build",
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "db:migrate": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
