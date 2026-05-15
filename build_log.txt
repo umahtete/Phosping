@@ -1,0 +1,1 @@
+Failed to create cache directory. Please ensure the user has write access to the target directory (/paperclip/.cache/node/corepack/v1). If the user's home directory does not exist, create it first.
