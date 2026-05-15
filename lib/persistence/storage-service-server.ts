@@ -1,17 +1,37 @@
 import { createPrismaClient } from './prisma-client';
+import type { SaveClassroomData } from './storage-service';
 
-export async function saveClassroom(data: any) {
+export async function saveClassroom(data: SaveClassroomData) {
   const prisma = createPrismaClient();
   try {
+    const { id, stage, scenes, outlines, title, status, userId, ltiContextId } = data;
     return await prisma.classroom.upsert({
-      where: { id: data.id },
-      update: { stage: data.stage, scenes: data.scenes, outlines: data.outlines },
-      create: { id: data.id, stage: data.stage, scenes: data.scenes, outlines: data.outlines },
+      where: { id },
+      update: {
+        stage,
+        scenes,
+        ...(outlines !== undefined && { outlines }),
+        ...(title !== undefined && { title }),
+        ...(status !== undefined && { status }),
+        ...(userId !== undefined && { userId }),
+        ...(ltiContextId !== undefined && { ltiContextId }),
+      },
+      create: {
+        id,
+        stage,
+        scenes,
+        outlines: outlines ?? {},
+        title: title ?? null,
+        status: status ?? 'active',
+        userId: userId ?? null,
+        ltiContextId: ltiContextId ?? null,
+      },
     });
   } finally {
     await prisma.$disconnect();
   }
 }
+
 export async function getClassroom(id: string) {
   const prisma = createPrismaClient();
   try {

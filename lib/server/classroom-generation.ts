@@ -22,6 +22,7 @@ import { buildSearchQuery } from '@/lib/server/search-query-builder';
 import { formatSearchResultsAsContext, searchWeb } from '@/lib/web-search';
 import type { BaiduSubSources, WebSearchProviderId } from '@/lib/web-search/types';
 import { persistClassroom } from '@/lib/server/classroom-storage';
+import { saveClassroom as saveClassroomToDB } from '@/lib/persistence/storage-service-server';
 import {
   generateMediaForClassroom,
   replaceMediaPlaceholders,
@@ -461,7 +462,21 @@ export async function generateClassroom(
     options.baseUrl,
   );
 
-  log.info(`Classroom persisted: ${persisted.id}, URL: ${persisted.url}`);
+  log.info(`Classroom persisted to filesystem: ${persisted.id}, URL: ${persisted.url}`);
+
+  try {
+    await saveClassroomToDB({
+      id: stageId,
+      stage,
+      scenes,
+      outlines,
+      title: stage.name || stage.topic || null,
+      status: 'active',
+    });
+    log.info(`Classroom persisted to PostgreSQL: ${stageId}`);
+  } catch (dbErr) {
+    log.error(`Failed to persist classroom to PostgreSQL: ${stageId}`, dbErr);
+  }
 
   await options.onProgress?.({
     step: 'completed',

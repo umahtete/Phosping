@@ -11,15 +11,15 @@ Live at: tutor.luxuptraining.com
 ---
 
 ## Phase 1: Whitelabel & Access Control (1-2 days)
-**Status: In Progress**
+**Status: ✅ Complete** (commit `fefe8a2`, pushed 2026-05-15)
 
 Get the platform usable for the in-house team immediately.
 
 - [x] Replace all "OpenMAIC" branding with "LuxUp Tutor" across the codebase
 - [x] Design placeholder logo, favicon, and sidebar branding reflecting "Light Up" theme
 - [x] Fix broken access-code system (wrong cookie format, missing endpoint, middleware passthrough)
-- [x] Wire middleware to enforce auth on homepage only, allow unauthenticated access to `/classroom/[id]/*`
-- [x] Set ACCESS_CODE env var in Coolify
+- [x] Wire access-code-guard to enforce auth on homepage only, allow unauthenticated access to `/classroom/[id]/*`
+- [ ] Set ACCESS_CODE env var in Coolify (manual step — needs deployment to take effect)
 
 ## Phase 2: Storage Hardening (2-3 days)
 **Status: Pending**

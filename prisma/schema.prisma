@@ -8,8 +8,14 @@ datasource db {
 
 
 model Classroom {
-  id       String @id
-  stage    Json
-  scenes   Json
-  outlines Json
+  id            String   @id
+  title         String?
+  status        String   @default("active")
+  stage         Json
+  scenes        Json
+  outlines      Json
+  userId        String?
+  ltiContextId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
