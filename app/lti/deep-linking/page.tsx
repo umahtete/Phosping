@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface Classroom {
@@ -11,6 +11,14 @@ interface Classroom {
 }
 
 export default function DeepLinkingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background p-8 text-muted-foreground">Loading...</div>}>
+      <DeepLinkingContent />
+    </Suspense>
+  );
+}
+
+function DeepLinkingContent() {
   const searchParams = useSearchParams();
   const platformId = searchParams.get('platformId');
 
