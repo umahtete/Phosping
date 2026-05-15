@@ -964,8 +964,8 @@ function GenerationPreviewContent() {
       await saveClassroom({
         id: stage.id,
         stage,
-        scenes: store.getState().scenes,
-        outlines: store.getState().outlines,
+        scenes: store.scenes,
+        outlines: store.outlines,
       });
       router.push(`/classroom/${stage.id}`);
     } catch (err) {
