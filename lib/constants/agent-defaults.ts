@@ -7,18 +7,18 @@
 
 /** Color palette cycled for generated agents */
 export const AGENT_COLOR_PALETTE = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ec4899',
-  '#06b6d4',
-  '#8b5cf6',
-  '#f97316',
-  '#14b8a6',
-  '#e11d48',
-  '#6366f1',
-  '#84cc16',
-  '#a855f7',
+  '#6B3A2A',
+  '#A0673C',
+  '#C9956B',
+  '#EDCA9E',
+  '#B5763E',
+  '#8B5E3C',
+  '#C4A67D',
+  '#7A4B30',
+  '#A0693D',
+  '#D4A574',
+  '#9E7B5A',
+  '#5C3D2E',
 ] as const;
 
 /**
@@ -27,14 +27,14 @@ export const AGENT_COLOR_PALETTE = [
  * Every entry MUST correspond to a file that exists under `public/avatars/`.
  */
 export const AGENT_DEFAULT_AVATARS = [
-  '/avatars/teacher.png',
-  '/avatars/assist.png',
-  '/avatars/curious.png',
-  '/avatars/thinker.png',
-  '/avatars/note-taker.png',
-  '/avatars/teacher-2.png',
-  '/avatars/assist-2.png',
-  '/avatars/curious-2.png',
-  '/avatars/thinker-2.png',
-  '/avatars/note-taker-2.png',
+  '/avatars/prof-amara.svg',
+  '/avatars/samir.svg',
+  '/avatars/carlos.svg',
+  '/avatars/yuki.svg',
+  '/avatars/priya.svg',
+  '/avatars/fatima.svg',
+  '/avatars/learner.svg',
+  '/avatars/scholar.svg',
+  '/avatars/prof-amara.svg',
+  '/avatars/samir.svg',
 ] as const;
