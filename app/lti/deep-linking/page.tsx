@@ -46,12 +46,13 @@ function DeepLinkingContent() {
     setSubmitting(true);
 
     try {
-      const dlSettings = document.cookie
+      const dlSettingsRaw = document.cookie
         .split('; ')
         .find((c) => c.startsWith('luxup_dl_settings='))
         ?.split('=')
         .slice(1)
         .join('=');
+      const dlSettings = dlSettingsRaw ? decodeURIComponent(dlSettingsRaw) : null;
 
       const res = await fetch('/api/lti/deep-linking-return', {
         method: 'POST',
