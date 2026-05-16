@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         acceptTypes: dlSettings.accept_types,
         data: dlSettings.data,
       }), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none', // Required for cross-origin LTI
         maxAge: 60 * 10, // 10 minutes
