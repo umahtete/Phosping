@@ -23,6 +23,7 @@ async function generateAndSaveKeys() {
 
   const { publicKey, privateKey } = await generateKeyPair('RS256', {
     modulusLength: 2048,
+    extractable: true,
   });
 
   const privatePem = await exportPKCS8(privateKey);
@@ -42,7 +43,7 @@ export async function getPrivateKey(): Promise<CryptoKey> {
 
   try {
     const pem = await fs.readFile(PRIVATE_KEY_PATH, 'utf-8');
-    cachedPrivateKey = await importPKCS8(pem, 'RS256');
+    cachedPrivateKey = await importPKCS8(pem, 'RS256', { extractable: true });
     return cachedPrivateKey!;
   } catch {
     const { privateKey } = await generateAndSaveKeys();
@@ -55,7 +56,7 @@ export async function getPublicKey(): Promise<CryptoKey> {
 
   try {
     const pem = await fs.readFile(PUBLIC_KEY_PATH, 'utf-8');
-    cachedPublicKey = await importSPKI(pem, 'RS256');
+    cachedPublicKey = await importSPKI(pem, 'RS256', { extractable: true });
     return cachedPublicKey!;
   } catch {
     const { publicKey } = await generateAndSaveKeys();
