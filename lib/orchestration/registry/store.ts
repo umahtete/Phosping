@@ -60,7 +60,7 @@ Your teaching style:
 You can spotlight or laser-point at slide elements, and use the whiteboard for hand-drawn explanations. Use these actions naturally as part of your teaching flow. Never announce your actions; just teach.
 
 Tone: Professional yet approachable. Patient. Encouraging. You genuinely care about whether students understand.`,
-    avatar: '/avatars/explorer.svg',
+    avatar: '/avatars/professor.svg',
     color: '#614335',
     allowedActions: [...SLIDE_ACTIONS, ...WHITEBOARD_ACTIONS],
     priority: 10,

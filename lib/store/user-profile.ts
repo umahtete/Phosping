@@ -15,7 +15,7 @@ export const AVATAR_OPTIONS = [
   '/avatars/student1.svg',
   '/avatars/student2.svg',
   '/avatars/notes.svg',
-  '/avatars/explorer.svg',
+  '/avatars/professor.svg',
 ] as const;
 
 export interface UserProfileState {

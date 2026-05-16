@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" fill="none" shape-rendering="auto">
+  <!-- Background -->
+  <rect width="280" height="280" rx="0" ry="0" x="0" y="0" fill="#f0f0f0"/>
+
+  <!-- Neck -->
+  <rect x="116" y="190" width="48" height="30" rx="4" fill="#614335"/>
+
+  <!-- Body / Shirt collar -->
+  <g transform="translate(0 215)">
+    <path d="M40 65h200v20H40z" fill="#2c3e50"/>
+    <!-- Collar -->
+    <path d="M108 0 L124 30 L132 22 L140 30 L156 0 L148 -5 L132 12 L124 4 L116 -5 Z" fill="#ecf0f1" transform="translate(0,-5)"/>
+    <!-- Tie -->
+    <path d="M136 5 L132 35 L140 35 Z" fill="#c0392b"/>
+    <path d="M134 32 L132 45 L140 45 L138 32 Z" fill="#c0392b"/>
+  </g>
+
+  <!-- Head -->
+  <ellipse cx="140" cy="120" rx="56" ry="62" fill="#614335"/>
+
+  <!-- Ears -->
+  <ellipse cx="82" cy="125" rx="10" ry="14" fill="#614335"/>
+  <ellipse cx="198" cy="125" rx="10" ry="14" fill="#614335"/>
+  <ellipse cx="82" cy="125" rx="6" ry="9" fill="#553628"/>
+  <ellipse cx="198" cy="125" rx="6" ry="9" fill="#553628"/>
+
+  <!-- Short hair (cropped fade) -->
+  <path d="M84 105 C84 72 108 50 140 50 C172 50 196 72 196 105 L196 95 C196 68 172 48 140 48 C108 48 84 68 84 95 Z" fill="#1a1210"/>
+  <path d="M88 100 C88 76 112 56 140 56 C168 56 192 76 192 100 L192 92 C192 70 168 52 140 52 C112 52 88 70 88 92 Z" fill="#2a1f18"/>
+  <!-- Hairline detail -->
+  <path d="M92 95 C95 80 116 62 140 62 C164 62 185 80 188 95" fill="none" stroke="#1a1210" stroke-width="3"/>
+
+  <!-- Eyebrows -->
+  <path d="M108 103 Q116 98 126 103" stroke="#1a1210" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M154 103 Q162 98 172 103" stroke="#1a1210" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Eyes - white -->
+  <ellipse cx="118" cy="118" rx="12" ry="8" fill="#fff"/>
+  <ellipse cx="162" cy="118" rx="12" ry="8" fill="#fff"/>
+  <!-- Iris -->
+  <circle cx="119" cy="118" r="5" fill="#3d2b1f"/>
+  <circle cx="163" cy="118" r="5" fill="#3d2b1f"/>
+  <!-- Pupils -->
+  <circle cx="120" cy="117" r="2.5" fill="#1a1210"/>
+  <circle cx="164" cy="117" r="2.5" fill="#1a1210"/>
+  <!-- Eye highlights -->
+  <circle cx="122" cy="116" r="1.2" fill="#fff"/>
+  <circle cx="166" cy="116" r="1.2" fill="#fff"/>
+  <!-- Eyelids (subtle) -->
+  <path d="M106 116 Q118 110 130 116" stroke="#553628" stroke-width="1" fill="none"/>
+  <path d="M150 116 Q162 110 174 116" stroke="#553628" stroke-width="1" fill="none"/>
+
+  <!-- Glasses -->
+  <rect x="100" y="108" width="32" height="22" rx="8" ry="8" stroke="#4a4a4a" stroke-width="2.5" fill="none"/>
+  <rect x="148" y="108" width="32" height="22" rx="8" ry="8" stroke="#4a4a4a" stroke-width="2.5" fill="none"/>
+  <!-- Bridge -->
+  <path d="M132 118 Q140 115 148 118" stroke="#4a4a4a" stroke-width="2" fill="none"/>
+  <!-- Arms -->
+  <line x1="100" y1="115" x2="86" y2="118" stroke="#4a4a4a" stroke-width="2"/>
+  <line x1="180" y1="115" x2="194" y2="118" stroke="#4a4a4a" stroke-width="2"/>
+
+  <!-- Nose -->
+  <path d="M138 125 Q134 138 130 143 Q135 146 140 147 Q145 146 150 143 Q146 138 142 125" fill="#553628"/>
+  <!-- Nose bridge highlight -->
+  <path d="M138 128 L138 136" stroke="#6d5040" stroke-width="1" opacity="0.5"/>
+
+  <!-- Cheekbones (warm highlight) -->
+  <ellipse cx="104" cy="138" rx="8" ry="5" fill="#7a5a45" opacity="0.3"/>
+  <ellipse cx="176" cy="138" rx="8" ry="5" fill="#7a5a45" opacity="0.3"/>
+
+  <!-- Mouth / smile -->
+  <path d="M124 158 Q132 165 140 166 Q148 165 156 158" stroke="#3d2b1f" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Lower lip -->
+  <path d="M128 162 Q140 170 152 162" fill="#8b5a45" opacity="0.4"/>
+
+  <!-- Beard (goatee / jawline) -->
+  <path d="M108 150 Q108 170 118 178 Q128 184 140 185 Q152 184 162 178 Q172 170 172 150 Q170 160 162 168 Q152 176 140 178 Q128 176 118 168 Q110 160 108 150 Z" fill="#1a1210" opacity="0.6"/>
+  <!-- Chin beard -->
+  <path d="M122 168 Q140 182 158 168 Q155 178 140 183 Q125 178 122 168 Z" fill="#1a1210" opacity="0.5"/>
+  <!-- Mustache -->
+  <path d="M122 152 Q130 156 140 157 Q150 156 158 152 Q155 156 148 158 Q140 159 132 158 Q125 156 122 152 Z" fill="#1a1210" opacity="0.7"/>
+
+  <!-- Forehead highlight -->
+  <ellipse cx="140" cy="80" rx="25" ry="8" fill="#7a5a45" opacity="0.15"/>
+</svg>

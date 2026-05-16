@@ -27,7 +27,7 @@ export const AGENT_COLOR_PALETTE = [
  * Every entry MUST correspond to a file that exists under `public/avatars/`.
  */
 export const AGENT_DEFAULT_AVATARS = [
-  '/avatars/explorer.svg',
+  '/avatars/professor.svg',
   '/avatars/coder.svg',
   '/avatars/creative.svg',
   '/avatars/student3.svg',
