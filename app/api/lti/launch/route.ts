@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateLtiToken, isResourceLinkLaunch, isDeepLinkingLaunch } from '@/lib/lti/validate';
 import { createLtiSession, SESSION_COOKIE } from '@/lib/lti/session';
+import { storeSettings } from '@/lib/lti/deep-linking-store';
 import { prisma } from '@/lib/persistence/prisma-client';
 import type { LtiDeepLinkingLaunch } from '@/lib/lti/types';
 
@@ -22,10 +23,7 @@ export async function POST(req: NextRequest) {
       return new Response('Missing id_token', { status: 400 });
     }
 
-    // Decode JWT header to find the issuer (without verification first)
-    const [headerB64] = idToken.split('.');
-    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString());
-    // Decode payload to find issuer and client_id for platform lookup
+    // Decode JWT payload to find issuer and client_id for platform lookup
     const payloadB64 = idToken.split('.')[1];
     const payloadRaw = JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
     const issuer = payloadRaw.iss as string;
@@ -47,25 +45,17 @@ export async function POST(req: NextRequest) {
     const toolBaseUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX || `https://${req.headers.get('host')}`;
 
     if (isDeepLinkingLaunch(launch)) {
-      // Deep Linking — redirect to a picker page that will show available classrooms
-      // Store the deep linking settings in a short-lived cookie
       const dlLaunch = launch as LtiDeepLinkingLaunch;
       const dlSettings = dlLaunch['https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings'];
-      
-      const response = NextResponse.redirect(`${toolBaseUrl}/lti/deep-linking?platformId=${platform.id}`);
-      response.cookies.set('luxup_dl_settings', JSON.stringify({
-        deploymentId: platform.deploymentId,
+
+      const dlKey = storeSettings({
         deep_link_return_url: dlSettings.deep_link_return_url,
         accept_presentation_document_targets: dlSettings.accept_presentation_document_targets,
         data: dlSettings.data,
-      }), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none', // Required for cross-origin LTI
-        maxAge: 60 * 10, // 10 minutes
-        path: '/',
       });
-      return response;
+      console.log('[lti-launch] Deep linking settings stored, dlKey:', dlKey, 'hasData:', !!dlSettings.data);
+
+      return NextResponse.redirect(`${toolBaseUrl}/lti/deep-linking?platformId=${platform.id}&dlKey=${dlKey}`);
     }
 
     if (isResourceLinkLaunch(launch)) {

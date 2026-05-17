@@ -3,6 +3,7 @@ import {
   buildDeepLinkingResponse,
   type DeepLinkingContentItem,
 } from '@/lib/lti/deep-linking';
+import { getSettings, deleteSettings } from '@/lib/lti/deep-linking-store';
 import { prisma } from '@/lib/persistence/prisma-client';
 
 /** Derive a readable title from stage JSON when title column is null. */
@@ -16,13 +17,13 @@ function deriveTitle(stage: unknown, id: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { platformId, classroomIds, dlSettingsJson } = body;
+    const { platformId, classroomIds, dlKey } = body;
 
-    if (!platformId || !classroomIds?.length || !dlSettingsJson) {
+    if (!platformId || !classroomIds?.length || !dlKey) {
       console.error('[deep-linking-return] Missing required fields:', {
         platformId: !!platformId,
         classroomIds: classroomIds?.length,
-        dlSettingsJson: !!dlSettingsJson,
+        dlKey: !!dlKey,
       });
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -41,12 +42,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const dlSettings = JSON.parse(dlSettingsJson);
+    const dlSettings = getSettings(dlKey);
+    if (!dlSettings) {
+      console.error('[deep-linking-return] Deep linking settings not found or expired for key:', dlKey);
+      return NextResponse.json(
+        { error: 'Deep linking session expired. Please relaunch from your LMS.' },
+        { status: 400 },
+      );
+    }
+    // One-time use — delete after reading
+    deleteSettings(dlKey);
 
     console.log('[deep-linking-return] Deep linking settings:', {
       hasReturnUrl: !!dlSettings.deep_link_return_url,
       hasData: !!dlSettings.data,
       dataType: typeof dlSettings.data,
+      dataLength: dlSettings.data?.length,
       deploymentId: platform.deploymentId,
       clientId: platform.clientId,
       issuer: platform.issuer,
@@ -56,6 +67,10 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_ASSET_PREFIX ||
       `https://${req.headers.get('host')}`;
 
+    // Determine presentation mode from deep linking settings
+    const targets = dlSettings.accept_presentation_document_targets || [];
+    const supportsIframe = targets.includes('iframe');
+
     const items: DeepLinkingContentItem[] = [];
     for (const id of classroomIds) {
       const classroom = await prisma.classroom.findUnique({ where: { id } });
@@ -64,9 +79,24 @@ export async function POST(req: NextRequest) {
         type: 'ltiResourceLink',
         title,
         url: `${toolBaseUrl}/classroom/${id}`,
+        text: `LuxUp Tutor Classroom: ${title}`,
+        ...(supportsIframe && {
+          iframe: {
+            width: 1200,
+            height: 800,
+          },
+        }),
+        icon: {
+          url: `${toolBaseUrl}/logo-horizontal.svg`,
+          width: 200,
+          height: 50,
+        },
         lineItem: {
           scoreMaximum: 100,
           label: title,
+        },
+        custom: {
+          classroom_id: id,
         },
       });
     }

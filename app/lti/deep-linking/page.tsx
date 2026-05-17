@@ -21,6 +21,7 @@ export default function DeepLinkingPage() {
 function DeepLinkingContent() {
   const searchParams = useSearchParams();
   const platformId = searchParams.get('platformId');
+  const dlKey = searchParams.get('dlKey');
 
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -42,25 +43,17 @@ function DeepLinkingContent() {
   }, []);
 
   async function handleSubmit() {
-    if (selected.size === 0 || !platformId) return;
+    if (selected.size === 0 || !platformId || !dlKey) return;
     setSubmitting(true);
 
     try {
-      const dlSettingsRaw = document.cookie
-        .split('; ')
-        .find((c) => c.startsWith('luxup_dl_settings='))
-        ?.split('=')
-        .slice(1)
-        .join('=');
-      const dlSettings = dlSettingsRaw ? decodeURIComponent(dlSettingsRaw) : null;
-
       const res = await fetch('/api/lti/deep-linking-return', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platformId,
           classroomIds: Array.from(selected),
-          dlSettingsJson: dlSettings || '{}',
+          dlKey,
         }),
       });
 
@@ -99,7 +92,11 @@ function DeepLinkingContent() {
           Choose a classroom to link in your Moodle course.
         </p>
 
-        {loading ? (
+        {!dlKey || !platformId ? (
+          <p className="text-destructive">
+            Missing deep linking key. Please relaunch from your LMS.
+          </p>
+        ) : loading ? (
           <p className="text-muted-foreground">Loading classrooms...</p>
         ) : error && classrooms.length === 0 ? (
           <p className="text-destructive">{error}</p>

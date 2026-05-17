@@ -15,6 +15,15 @@ import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
 
 const log = createLogger('Classroom');
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 export default function ClassroomDetailPage() {
   const params = useParams();
   const classroomId = params?.id as string;
@@ -33,10 +42,15 @@ export default function ClassroomDetailPage() {
   });
 
   const loadClassroom = useCallback(async () => {
+    log.info('[Classroom] Loading classroom:', classroomId, 'isIframe:', window !== window.top);
+    let loadedFromServer = false;
     try {
-      await loadFromStorage(classroomId);
+      try {
+        await withTimeout(loadFromStorage(classroomId), 8000, 'IndexedDB load');
+      } catch (idbError) {
+        log.warn('IndexedDB load failed or timed out (expected in cross-origin iframe):', idbError);
+      }
 
-      // If IndexedDB had no data, try server-side storage (API-generated classrooms)
       if (!useStageStore.getState().stage) {
         log.info('No IndexedDB data, trying server-side storage for:', classroomId);
         try {
@@ -50,51 +64,75 @@ export default function ClassroomDetailPage() {
                 scenes,
                 currentSceneId: scenes[0]?.id ?? null,
               });
+              loadedFromServer = true;
               log.info('Loaded from server-side storage:', classroomId);
 
-              // Hydrate server-generated agents into IndexedDB + registry.
-              // Don't set selectedAgentIds here — the general agent
-              // restoration logic below (Path 2) handles it uniformly.
               if (stage.generatedAgentConfigs?.length) {
                 const { saveGeneratedAgents } = await import('@/lib/orchestration/registry/store');
                 await saveGeneratedAgents(stage.id, stage.generatedAgentConfigs);
                 log.info('Hydrated server-generated agents for stage:', stage.id);
               }
+            } else {
+              log.warn('Server returned success:false or no classroom data for:', classroomId);
             }
+          } else {
+            log.warn('Server returned status:', res.status, 'for classroom:', classroomId);
           }
         } catch (fetchErr) {
           log.warn('Server-side storage fetch failed:', fetchErr);
         }
       }
 
-      // Restore completed media generation tasks from IndexedDB
-      await useMediaGenerationStore.getState().restoreFromDB(classroomId);
-      // Restore agents for this stage
-      const { loadGeneratedAgentsForStage, useAgentRegistry } =
-        await import('@/lib/orchestration/registry/store');
-      const generatedAgentIds = await loadGeneratedAgentsForStage(classroomId);
-      const { useSettingsStore } = await import('@/lib/store/settings');
-      if (generatedAgentIds.length > 0) {
-        // Auto mode — use generated agents from IndexedDB
-        useSettingsStore.getState().setAgentMode('auto');
-        useSettingsStore.getState().setSelectedAgentIds(generatedAgentIds);
-      } else {
-        // Preset mode — restore agent IDs saved in the stage at creation time.
-        // Filter out any stale generated IDs that may have been persisted before
-        // the bleed-fix, so they don't resolve against a leftover registry entry.
-        const stage = useStageStore.getState().stage;
-        const stageAgentIds = stage?.agentIds;
-        const registry = useAgentRegistry.getState();
-        const cleanIds = stageAgentIds?.filter((id) => {
-          const a = registry.getAgent(id);
-          return a && !a.isGenerated;
-        });
-        useSettingsStore.getState().setAgentMode('preset');
-        useSettingsStore
-          .getState()
-          .setSelectedAgentIds(
-            cleanIds && cleanIds.length > 0 ? cleanIds : ['default-1', 'default-2', 'default-3'],
+      if (useStageStore.getState().stage) {
+        try {
+          await withTimeout(
+            useMediaGenerationStore.getState().restoreFromDB(classroomId),
+            5000,
+            'Media restore',
           );
+        } catch (e) {
+          log.warn('Media restore skipped (cross-origin iframe):', e);
+        }
+
+        try {
+          const { loadGeneratedAgentsForStage, useAgentRegistry } =
+            await import('@/lib/orchestration/registry/store');
+          const generatedAgentIds = await withTimeout(
+            loadGeneratedAgentsForStage(classroomId),
+            5000,
+            'Agent restore',
+          );
+          const { useSettingsStore } = await import('@/lib/store/settings');
+          if (generatedAgentIds.length > 0) {
+            useSettingsStore.getState().setAgentMode('auto');
+            useSettingsStore.getState().setSelectedAgentIds(generatedAgentIds);
+          } else {
+            const stage = useStageStore.getState().stage;
+            const stageAgentIds = stage?.agentIds;
+            const registry = useAgentRegistry.getState();
+            const cleanIds = stageAgentIds?.filter((id) => {
+              const a = registry.getAgent(id);
+              return a && !a.isGenerated;
+            });
+            useSettingsStore.getState().setAgentMode('preset');
+            useSettingsStore
+              .getState()
+              .setSelectedAgentIds(
+                cleanIds && cleanIds.length > 0
+                  ? cleanIds
+                  : ['default-1', 'default-2', 'default-3'],
+              );
+          }
+        } catch (e) {
+          log.warn('Agent restore skipped (cross-origin iframe):', e);
+          const { useSettingsStore } = await import('@/lib/store/settings');
+          useSettingsStore.getState().setAgentMode('preset');
+          useSettingsStore.getState().setSelectedAgentIds(['default-1', 'default-2', 'default-3']);
+        }
+      }
+
+      if (!useStageStore.getState().stage) {
+        setError('Classroom not found. It may not have been saved to the server.');
       }
     } catch (error) {
       log.error('Failed to load classroom:', error);

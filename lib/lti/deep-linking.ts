@@ -10,10 +10,25 @@ export interface DeepLinkingContentItem {
   type: 'ltiResourceLink';
   title: string;
   url: string;
+  text?: string;
+  icon?: {
+    url: string;
+    width: number;
+    height: number;
+  };
+  iframe?: {
+    width: number;
+    height: number;
+  };
+  window?: {
+    targetName: string;
+    windowFeatures: string;
+  };
   lineItem?: {
     scoreMaximum: number;
     label: string;
   };
+  custom?: Record<string, string>;
 }
 
 export async function buildDeepLinkingResponse(
@@ -39,9 +54,14 @@ export async function buildDeepLinkingResponse(
       type: item.type,
       title: item.title,
       url: item.url,
+      ...(item.text && { text: item.text }),
+      ...(item.icon && { icon: item.icon }),
+      ...(item.iframe && { iframe: item.iframe }),
+      ...(item.window && { window: item.window }),
       ...(item.lineItem && {
         lineItem: item.lineItem,
       }),
+      ...(item.custom && { custom: item.custom }),
     })),
     'https://purl.imsglobal.org/spec/lti-dl/claim/data': deepLinkingSettings.data,
   })
