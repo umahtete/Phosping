@@ -2,8 +2,9 @@
  * LTI 1.3 Deep Linking response builder.
  */
 
-import { SignJWT } from 'jose';
+import { SignJWT, exportJWK } from 'jose';
 import { getPrivateKey } from './keys';
+import { randomUUID } from 'crypto';
 
 export interface DeepLinkingContentItem {
   type: 'ltiResourceLink';
@@ -44,11 +45,13 @@ export async function buildDeepLinkingResponse(
     })),
     'https://purl.imsglobal.org/spec/lti-dl/claim/data': deepLinkingSettings.data,
   })
-    .setProtectedHeader({ alg: 'RS256', kid: 'luxup-tutor-key-1' })
+    .setProtectedHeader({ alg: 'RS256', kid: 'luxup-tutor-key-1', typ: 'JWT' })
     .setIssuedAt()
     .setExpirationTime('5m')
     .setIssuer(platform.clientId)
+    .setSubject(platform.clientId)
     .setAudience(platform.issuer)
+    .setJti(randomUUID())
     .sign(privateKey);
 
   return {
