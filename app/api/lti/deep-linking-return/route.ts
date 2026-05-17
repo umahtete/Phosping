@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const { jwt, returnUrl } = await buildDeepLinkingResponse(
       items,
-      platform.deploymentId,
+      { clientId: platform.clientId, issuer: platform.issuer, deploymentId: platform.deploymentId },
       dlSettings,
     );
 

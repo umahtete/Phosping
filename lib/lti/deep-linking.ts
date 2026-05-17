@@ -17,7 +17,11 @@ export interface DeepLinkingContentItem {
 
 export async function buildDeepLinkingResponse(
   contentItems: DeepLinkingContentItem[],
-  deploymentId: string,
+  platform: {
+    clientId: string;
+    issuer: string;
+    deploymentId: string;
+  },
   deepLinkingSettings: {
     deep_link_return_url: string;
     accept_presentation_document_targets: string[];
@@ -40,8 +44,8 @@ export async function buildDeepLinkingResponse(
     .setProtectedHeader({ alg: 'RS256', kid: 'luxup-tutor-key-1' })
     .setIssuedAt()
     .setExpirationTime('5m')
-    .setIssuer(process.env.NEXT_PUBLIC_ASSET_PREFIX || 'https://tutor.luxuptraining.com')
-    .setAudience(deploymentId)
+    .setIssuer(platform.clientId)
+    .setAudience(platform.issuer)
     .sign(privateKey);
 
   return {
