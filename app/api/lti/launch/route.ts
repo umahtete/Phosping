@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
       const response = NextResponse.redirect(`${toolBaseUrl}/lti/deep-linking?platformId=${platform.id}`);
       response.cookies.set('luxup_dl_settings', JSON.stringify({
         deploymentId: platform.deploymentId,
-        deepLinkReturnUrl: dlSettings.deep_link_return_url,
-        acceptTypes: dlSettings.accept_types,
+        deep_link_return_url: dlSettings.deep_link_return_url,
+        accept_presentation_document_targets: dlSettings.accept_presentation_document_targets,
         data: dlSettings.data,
       }), {
         httpOnly: false,
