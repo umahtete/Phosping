@@ -15,6 +15,9 @@ import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
 
 const log = createLogger('Classroom');
 
+/** Build timestamp injected at build time to confirm code version. */
+const BUILD_TS = process.env.NEXT_PUBLIC_BUILD_TS || 'dev';
+
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return Promise.race([
     promise,
@@ -32,6 +35,7 @@ export default function ClassroomDetailPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [phase, setPhase] = useState('initializing');
 
   const generationStartedRef = useRef(false);
 
@@ -42,19 +46,35 @@ export default function ClassroomDetailPage() {
   });
 
   const loadClassroom = useCallback(async () => {
-    log.info('[Classroom] Loading classroom:', classroomId, 'isIframe:', window !== window.top);
-    let loadedFromServer = false;
+    const isIframe = typeof window !== 'undefined' && window !== window.top;
+    log.info('[Classroom] START loadClassroom:', classroomId, 'isIframe:', isIframe, 'build:', BUILD_TS);
+    setPhase('starting');
+
+    // ABSOLUTE SAFETY: force loading to false after 20 seconds no matter what
+    const safetyTimeout = setTimeout(() => {
+      log.error('[Classroom] SAFETY TIMEOUT — forcing loading=false after 20s');
+      setPhase('safety-timeout');
+      setError('Loading timed out. Please try refreshing the page.');
+      setLoading(false);
+    }, 20000);
+
     try {
+      // Phase 1: Try IndexedDB (with timeout for cross-origin iframe safety)
+      setPhase('loading-indexeddb');
       try {
         await withTimeout(loadFromStorage(classroomId), 8000, 'IndexedDB load');
+        log.info('[Classroom] IndexedDB load completed');
       } catch (idbError) {
-        log.warn('IndexedDB load failed or timed out (expected in cross-origin iframe):', idbError);
+        log.warn('[Classroom] IndexedDB load failed or timed out:', idbError);
       }
 
+      // Phase 2: If no data from IndexedDB, try server API
       if (!useStageStore.getState().stage) {
-        log.info('No IndexedDB data, trying server-side storage for:', classroomId);
+        setPhase('loading-server');
+        log.info('[Classroom] No IndexedDB data, fetching from server:', classroomId);
         try {
           const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
+          log.info('[Classroom] Server response status:', res.status);
           if (res.ok) {
             const json = await res.json();
             if (json.success && json.classroom) {
@@ -64,26 +84,28 @@ export default function ClassroomDetailPage() {
                 scenes,
                 currentSceneId: scenes[0]?.id ?? null,
               });
-              loadedFromServer = true;
-              log.info('Loaded from server-side storage:', classroomId);
+              log.info('[Classroom] Loaded from server:', classroomId, 'scenes:', scenes?.length);
 
               if (stage.generatedAgentConfigs?.length) {
                 const { saveGeneratedAgents } = await import('@/lib/orchestration/registry/store');
                 await saveGeneratedAgents(stage.id, stage.generatedAgentConfigs);
-                log.info('Hydrated server-generated agents for stage:', stage.id);
+                log.info('[Classroom] Hydrated server-generated agents');
               }
             } else {
-              log.warn('Server returned success:false or no classroom data for:', classroomId);
+              log.warn('[Classroom] Server returned no classroom data for:', classroomId, json);
             }
           } else {
-            log.warn('Server returned status:', res.status, 'for classroom:', classroomId);
+            const errText = await res.text().catch(() => '');
+            log.warn('[Classroom] Server returned status:', res.status, errText);
           }
         } catch (fetchErr) {
-          log.warn('Server-side storage fetch failed:', fetchErr);
+          log.warn('[Classroom] Server fetch failed:', fetchErr);
         }
       }
 
+      // Phase 3: Restore media and agents (only if we have data)
       if (useStageStore.getState().stage) {
+        setPhase('restoring-media');
         try {
           await withTimeout(
             useMediaGenerationStore.getState().restoreFromDB(classroomId),
@@ -91,9 +113,10 @@ export default function ClassroomDetailPage() {
             'Media restore',
           );
         } catch (e) {
-          log.warn('Media restore skipped (cross-origin iframe):', e);
+          log.warn('[Classroom] Media restore skipped:', e);
         }
 
+        setPhase('restoring-agents');
         try {
           const { loadGeneratedAgentsForStage, useAgentRegistry } =
             await import('@/lib/orchestration/registry/store');
@@ -124,44 +147,48 @@ export default function ClassroomDetailPage() {
               );
           }
         } catch (e) {
-          log.warn('Agent restore skipped (cross-origin iframe):', e);
-          const { useSettingsStore } = await import('@/lib/store/settings');
-          useSettingsStore.getState().setAgentMode('preset');
-          useSettingsStore.getState().setSelectedAgentIds(['default-1', 'default-2', 'default-3']);
+          log.warn('[Classroom] Agent restore skipped:', e);
+          try {
+            const { useSettingsStore } = await import('@/lib/store/settings');
+            useSettingsStore.getState().setAgentMode('preset');
+            useSettingsStore.getState().setSelectedAgentIds(['default-1', 'default-2', 'default-3']);
+          } catch { /* best effort */ }
         }
       }
 
+      // Phase 4: Check if we ended up with nothing
       if (!useStageStore.getState().stage) {
-        setError('Classroom not found. It may not have been saved to the server.');
+        log.error('[Classroom] No data loaded for classroom:', classroomId);
+        setError(
+          'Classroom not found. It may not have been saved to the server. ' +
+          `ID: ${classroomId}`
+        );
+      } else {
+        setPhase('ready');
       }
     } catch (error) {
-      log.error('Failed to load classroom:', error);
+      log.error('[Classroom] loadClassroom FAILED:', error);
       setError(error instanceof Error ? error.message : 'Failed to load classroom');
     } finally {
+      clearTimeout(safetyTimeout);
       setLoading(false);
+      log.info('[Classroom] loadClassroom DONE, loading=false');
     }
   }, [classroomId, loadFromStorage]);
 
   useEffect(() => {
-    // Reset loading state on course switch to unmount Stage during transition,
-    // preventing stale data from syncing back to the new course
     setLoading(true);
     setError(null);
+    setPhase('initializing');
     generationStartedRef.current = false;
 
-    // Clear previous classroom's media tasks to prevent cross-classroom contamination.
-    // Placeholder IDs (gen_img_1, gen_vid_1) are NOT globally unique across stages,
-    // so stale tasks from a previous classroom would shadow the new one's.
     const mediaStore = useMediaGenerationStore.getState();
     mediaStore.revokeObjectUrls();
     useMediaGenerationStore.setState({ tasks: {} });
-
-    // Clear whiteboard history to prevent snapshots from a previous course leaking in.
     useWhiteboardHistoryStore.getState().clearHistory();
 
     loadClassroom();
 
-    // Cancel ongoing generation when classroomId changes or component unmounts
     return () => {
       stop();
     };
@@ -174,18 +201,15 @@ export default function ClassroomDetailPage() {
     const state = useStageStore.getState();
     const { outlines, scenes, stage } = state;
 
-    // Check if there are pending outlines
     const completedOrders = new Set(scenes.map((s) => s.order));
     const hasPending = outlines.some((o) => !completedOrders.has(o.order));
 
     if (hasPending && stage) {
       generationStartedRef.current = true;
 
-      // Load generation params from sessionStorage (stored by generation-preview before navigating)
       const genParamsStr = sessionStorage.getItem('generationParams');
       const params = genParamsStr ? JSON.parse(genParamsStr) : {};
 
-      // Reconstruct imageMapping from IndexedDB using pdfImages storageIds
       const storageIds = (params.pdfImages || [])
         .map((img: { storageId?: string }) => img.storageId)
         .filter(Boolean);
@@ -205,9 +229,6 @@ export default function ClassroomDetailPage() {
         });
       });
     } else if (outlines.length > 0 && stage) {
-      // All scenes are generated, but some media may not have finished.
-      // Resume media generation for any tasks not yet in IndexedDB.
-      // generateMediaForOutlines skips already-completed tasks automatically.
       generationStartedRef.current = true;
       generateMediaForOutlines(outlines, stage.id).catch((err) => {
         log.warn('[Classroom] Media generation resume error:', err);
@@ -221,14 +242,23 @@ export default function ClassroomDetailPage() {
         <div className="h-screen flex flex-col overflow-hidden">
           {loading ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-              <div className="text-center text-muted-foreground">
-                <p>Loading classroom...</p>
+              <div className="text-center text-muted-foreground max-w-md">
+                <p className="text-lg mb-3">Loading classroom...</p>
+                <p className="text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded px-3 py-2 mb-2">
+                  Phase: {phase}
+                </p>
+                <p className="text-xs text-gray-400">
+                  ID: {classroomId} &middot; Build: {BUILD_TS}
+                </p>
               </div>
             </div>
           ) : error ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-              <div className="text-center">
-                <p className="text-destructive mb-4">Error: {error}</p>
+              <div className="text-center max-w-md">
+                <p className="text-destructive mb-4">{error}</p>
+                <p className="text-xs text-muted-foreground mb-4 font-mono">
+                  Phase: {phase} &middot; ID: {classroomId} &middot; Build: {BUILD_TS}
+                </p>
                 <button
                   onClick={() => {
                     setError(null);

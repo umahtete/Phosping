@@ -24,6 +24,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
 
+# Inject build timestamp so the client can confirm which version is deployed
+ENV NEXT_PUBLIC_BUILD_TS=$(date -u +%Y%m%d-%H%M%S)
+
 RUN pnpm build
 
 # ---- Stage 4: Runner ----
