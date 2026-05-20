@@ -1,22 +1,11 @@
-import { apiSuccess } from '@/lib/server/api-response';
-import {
-  getServerWebSearchProviders,
-  getServerImageProviders,
-  getServerVideoProviders,
-  getServerTTSProviders,
-} from '@/lib/server/provider-config';
-
-const version = process.env.npm_package_version || '0.1.0';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  return apiSuccess({
+  return NextResponse.json({
     status: 'ok',
-    version,
-    capabilities: {
-      webSearch: Object.keys(getServerWebSearchProviders()).length > 0,
-      imageGeneration: Object.keys(getServerImageProviders()).length > 0,
-      videoGeneration: Object.keys(getServerVideoProviders()).length > 0,
-      tts: Object.keys(getServerTTSProviders()).length > 0,
-    },
+    timestamp: new Date().toISOString(),
+    buildTs: process.env.NEXT_PUBLIC_BUILD_TS || 'not-set',
+    nodeEnv: process.env.NODE_ENV,
+    allowedFrameAncestors: process.env.ALLOWED_FRAME_ANCESTORS || 'not-set (frame-ancestors: self only)',
   });
 }

@@ -25,9 +25,9 @@ COPY --from=deps /app/packages ./packages
 COPY . .
 
 # Inject build timestamp so the client can confirm which version is deployed
-ENV NEXT_PUBLIC_BUILD_TS=$(date -u +%Y%m%d-%H%M%S)
-
-RUN pnpm build
+RUN export NEXT_PUBLIC_BUILD_TS=$(date -u +%Y%m%d-%H%M%S) && \
+    echo "Build timestamp: $NEXT_PUBLIC_BUILD_TS" && \
+    NEXT_PUBLIC_BUILD_TS=$NEXT_PUBLIC_BUILD_TS pnpm build
 
 # ---- Stage 4: Runner ----
 FROM node:22-alpine AS runner
