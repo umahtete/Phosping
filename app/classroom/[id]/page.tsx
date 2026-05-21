@@ -27,6 +27,29 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   ]);
 }
 
+async function saveClassroomToServer(stageId: string) {
+  try {
+    const store = useStageStore.getState();
+    if (!store.stage) return;
+    const { stage, scenes, outlines } = store;
+    await fetch('/api/classroom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: stageId,
+        stage,
+        scenes,
+        outlines,
+        title: stage.name || undefined,
+        status: 'active',
+      }),
+    });
+    log.info('[Classroom] Saved to PostgreSQL:', stageId, 'scenes:', scenes.length);
+  } catch (err) {
+    log.warn('[Classroom] Failed to save to PostgreSQL:', err);
+  }
+}
+
 export default function ClassroomDetailPage() {
   const params = useParams();
   const classroomId = params?.id as string;
@@ -42,6 +65,7 @@ export default function ClassroomDetailPage() {
   const { generateRemaining, retrySingleOutline, stop } = useSceneGenerator({
     onComplete: () => {
       log.info('[Classroom] All scenes generated');
+      saveClassroomToServer(classroomId);
     },
   });
 
@@ -68,6 +92,11 @@ export default function ClassroomDetailPage() {
         log.warn('[Classroom] IndexedDB load failed or timed out:', idbError);
       }
 
+      // Re-sync to PostgreSQL if IndexedDB had data (ensures LTI users get the latest)
+      if (useStageStore.getState().stage) {
+        saveClassroomToServer(classroomId); // fire-and-forget
+      }
+
       // Phase 2: If no data from IndexedDB, try server API
       if (!useStageStore.getState().stage) {
         setPhase('loading-server');
@@ -78,13 +107,15 @@ export default function ClassroomDetailPage() {
           if (res.ok) {
             const json = await res.json();
             if (json.success && json.classroom) {
-              const { stage, scenes } = json.classroom;
+              const { stage, scenes, outlines } = json.classroom;
               useStageStore.getState().setStage(stage);
               useStageStore.setState({
                 scenes,
                 currentSceneId: scenes[0]?.id ?? null,
+                // Load outlines from server so generation state is available
+                ...(Array.isArray(outlines) && { outlines }),
               });
-              log.info('[Classroom] Loaded from server:', classroomId, 'scenes:', scenes?.length);
+              log.info('[Classroom] Loaded from server:', classroomId, 'scenes:', scenes?.length, 'outlines:', Array.isArray(outlines) ? outlines.length : 0);
 
               if (stage.generatedAgentConfigs?.length) {
                 const { saveGeneratedAgents } = await import('@/lib/orchestration/registry/store');

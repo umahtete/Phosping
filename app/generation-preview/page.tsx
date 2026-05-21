@@ -970,11 +970,13 @@ function GenerationPreviewContent() {
 
       sessionStorage.removeItem('generationSession');
       await store.saveToStorage();
+      // Read FRESH state — the `store` variable is a stale snapshot from before generation
+      const freshState = useStageStore.getState();
       await saveClassroomProxy({
         id: stage.id,
         stage,
-        scenes: store.scenes,
-        outlines: store.outlines,
+        scenes: freshState.scenes,
+        outlines: freshState.outlines,
       });
       router.push(`/classroom/${stage.id}`);
     } catch (err) {
