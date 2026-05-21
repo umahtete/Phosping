@@ -272,7 +272,23 @@ export default function ClassroomDetailPage() {
               </div>
             </div>
           ) : (
-            <Stage onRetryOutline={retrySingleOutline} />
+            <>
+              {/* DEBUG BANNER — remove after launch */}
+              <div style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
+                background: '#059669', color: 'white', fontSize: 11,
+                padding: '4px 12px', fontFamily: 'monospace',
+                display: 'flex', gap: 16, justifyContent: 'center',
+              }}>
+                <span>STAGE RENDERED</span>
+                <span>scenes: {useStageStore.getState().scenes?.length ?? '?'}</span>
+                <span>currentSceneId: {useStageStore.getState().currentSceneId ?? 'null'}</span>
+                <span>stage: {useStageStore.getState().stage?.name ?? 'null'}</span>
+                <span>outlines: {useStageStore.getState().outlines?.length ?? '?'}</span>
+                <span>build: {BUILD_TS}</span>
+              </div>
+              <Stage onRetryOutline={retrySingleOutline} />
+            </>
           )}
         </div>
       </MediaStageProvider>
